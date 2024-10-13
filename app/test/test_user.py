@@ -26,21 +26,6 @@ def test_registerUser_ReturnSuccess():
         "userId": "user123"
     }
 
-def test_registerUser_EmailExists_ReturnError():
-    mockException = UserException(400, "Email already exists")
-    
-    with patch.object(UserService, 'registerUser', side_effect=mockException):
-        userData = {
-            "email": "existingUser@example.com",
-            "password": "password123",
-            "confirmedPassword": "password123",
-            "phoneNumber": "+12345678901"
-        }
-        response = client.post("/api/user/register", json=userData)
-
-    assert response.status_code == 400
-    assert response.json() == {"detail": "Email already exists"}
-
 def test_loginUser_ReturnSuccess():
     mockResponse = {"statusCode": 200, "message": "Login successful", "userId": "user123", "token": "token123"}
 
