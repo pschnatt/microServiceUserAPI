@@ -13,7 +13,6 @@ def test_registerUser_ReturnSuccess():
     
     with patch.object(UserService, 'registerUser', return_value=mockResponse):
         userData = {
-            "username": "user123",
             "email": "user123@example.com",
             "password": "password123",
             "confirmedPassword": "password123",

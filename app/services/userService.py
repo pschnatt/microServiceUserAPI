@@ -19,10 +19,6 @@ class UserService:
     def registerUser(self, userRegister : RegisterData):
         try:
             userData = userRegister.model_dump()
-            if  self.collection.find_one({"email" : userData["username"]}):
-                raise UserException(400, "Username already exists")
-            
-
             if self.collection.find_one({"email" : userData["email"]}):
                 raise UserException(400, "Email already exists")
             
