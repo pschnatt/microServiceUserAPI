@@ -1,8 +1,8 @@
 from fastapi import FastAPI
-from app.controllers.userController import router as restaurantController
-app = FastAPI()
+from app.controllers.userController import router as userController
 
-app.include_router(restaurantController, prefix="/api/user")
+app = FastAPI()
+app.include_router(userController, prefix="/api/user")
 
 if __name__ == "__main__":
     import uvicorn

@@ -42,53 +42,55 @@ class UserService:
             result = self.collection.insert_one(userData)
 
             return {"statusCode": 201, "userId": str(result.inserted_id)}
-        
+
         except UserException as e:
             raise e
         except Exception as e:
             raise UserException(500, f"Error creating user: {str(e)}")
         
-    def loginUser(self, userLogin : LoginData, response: Response):
+    def loginUser(self, data : LoginData, response: Response):
         
-        try:
-            userData = userLogin.model_dump()
-            user = self.collection.find_one({"email" : userData["email"]})
+        user = self.collection.find_one({"email": data.email})
 
-            if not user:
-                raise UserException(400, f"user not found")
-                
-            stored_password = user.get("hashedPassword")
+        if not user:
+            raise Exception("User not found.")
 
-            if bcrypt.checkpw(userData["password"].encode('utf-8'), stored_password):
-                token = self.createJwtToken(user["_id"])
-                
-                expiration_time = datetime.now(timezone.utc) + timedelta(hours=1)
-                response.set_cookie(
-                    key="jwt_token",
-                    value=token,
-                    httponly=True,  
-                    secure=True,    
-                    samesite="Lax",
-                    expires=expiration_time
-                )
-                return {"statusCode" : 200, "message": "Login successful", "userId": str(user["_id"]), "token" : token}
-        except UserException as e:
-            raise e
-        except Exception as e:
-            raise UserException(500, f"Error creating user: {str(e)}")
+        storedPassword = user.get("hashedPassword")
+
+        if bcrypt.checkpw(data.password.encode('utf-8'), storedPassword):
+            token = self.createJwtToken(user["_id"])
+
+            expirationTime = datetime.now(timezone.utc) + timedelta(hours=100)
+
+            response.set_cookie(
+                key="jwt_token",
+                value=token,
+                httponly=True,  
+                secure=True,
+                samesite="Lax",
+                expires=expirationTime
+            )
+
+            return {
+                "statusCode" : 200,
+                "message": "Login successful",
+                "userId": str(user["_id"]),
+                "token" : token,
+                "response" : response
+            }
     
     def createJwtToken(self, userId):
         try:
-            expiration_time = datetime.now(timezone.utc) + timedelta(hours=10)
+            expirationTime = datetime.now(timezone.utc) + timedelta(hours=10)
             payload = {
                 "userId": str(userId),
-                "exp": expiration_time
+                "exp": expirationTime
             }
             token = jwt.encode(payload, settings.SECRET_KEY, algorithm="HS256")
-            return {"statusCode" : 200, "token" : token}
+            return token
         
         except Exception as e:
-            raise UserException(500, f"Error creating user: {str(e)}") 
+            raise UserException(500, f"Error jwt token: {str(e)}") 
 
     def verifyJwtToken(self, request: Request):
         try:
@@ -100,5 +102,5 @@ class UserService:
         except UserException as e:
             raise e
         except Exception as e:
-            raise UserException(500, f"Error creating user: {str(e)}")
+            raise UserException(500, f"Error verifying user: {str(e)}")
         

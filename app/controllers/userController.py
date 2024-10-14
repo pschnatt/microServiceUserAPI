@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta, timezone
 from fastapi import APIRouter, HTTPException, Request, Response
 from fastapi.responses import JSONResponse
 
@@ -20,8 +21,14 @@ async def registerUser(registerData : RegisterData):
 @router.post("/login")
 async def loginUser(loginData : LoginData, response : Response):
     try:
-        result = userService.loginUser(loginData, response)
-        return JSONResponse(status_code=result["statusCode"], content={"message": "User successfully login", "userId": result["userId"], "token" : result["token"]})
+
+        result = userService.loginUser(loginData, response=response)
+        
+        return JSONResponse(
+            status_code=result["statusCode"], 
+            content={"message": "User successfully login", "userId": result["userId"], "token": result["token"]},
+            headers=dict(response.headers))
+    
     except UserException as e:
         raise HTTPException(status_code=e.status_code, detail=e.detail)
 
