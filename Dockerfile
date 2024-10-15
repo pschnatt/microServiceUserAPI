@@ -22,4 +22,4 @@ COPY . .
 EXPOSE 8002
 
 # Define the command to run the application
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8002", "--reload"]
